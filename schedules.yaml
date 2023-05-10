@@ -1,0 +1,23 @@
+schedules:
+  - cron: '0 7 * * 0-4'
+    displayName: 'Daily morning build except for Friday and Saturday'
+    branches:
+      include:
+        - '*dev*'
+pool:
+  vmImage: 'ubuntu-22.04'
+
+steps:
+  - bash: echo "Hello world! Have a good day"
+  - task: Bash@3
+    displayName: 'Search for ERROR in files ending with log in all branches containing the word dev'
+    inputs:
+      targetType: 'filePath'
+      filePath: "$(System.DefaultWorkingDirectory)/scripts/run_logerror.bash" #System.DefaultWorkingDirectory is a azure pipelien predefined value for the workspace. 
+                                                                               #scrupts is one of the first directories in the github repository so it will find it
+  - task: UsePythonVersion@0
+    displayName: 'Find all files that end in log inside the branches containing the word dev in their name and print to a txt file'
+    inputs:
+      versionSpec: '2.7.5'
+      targetType: 'filePath'
+      filePath: "$(System.DefaultWorkingDirectory)/scripts/all_errors.py"
